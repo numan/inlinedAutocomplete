@@ -28,7 +28,8 @@
             delay: 10,
             helpMessage: "Please type a name.",
             parseResponse: function(resp) { return response; },
-            parseItem: null
+            searchGetParam: "term",
+            filterSearchResults: function(results) { return results; }
         },
 
         __create: function() {
@@ -412,7 +413,7 @@
                     this.close();
                 } else if (term.length > 0) {
                     if (/\s/.test(term)) {
-                        this.close()
+                        this.close();
                     } else {
                         this.updateHidden();
                         return this._search(term);
@@ -423,7 +424,7 @@
             } else {
                 // Call this whenever the user deletes the trigger.
                 this.close();
-            }   
+            }
         },
 
         close: function( event ) {
@@ -467,12 +468,15 @@
                     if ( self.xhr ) {
                         self.xhr.abort();
                     }
+                    var getParams = {};
+                    getParams[this.options.searchGetParam] = request['term'];
+
                     self.xhr = $.ajax({
                         url: url,
-                        data: request,
+                        data: getParams,
                         dataType: 'json',
                         success: function(data) {
-                            data = self.parseResponse(data);
+                            data = self.options.filterSearchResults(self.options.parseResponse(data));
 
                             if(data !== null) {
                                 response($.map(data, function(item) {
